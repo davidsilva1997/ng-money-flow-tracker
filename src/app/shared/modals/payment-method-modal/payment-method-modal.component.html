@@ -1,0 +1,27 @@
+<button class="btn btn-success btn-sm" (click)="openModal()">New Payment Method</button>
+
+<div class="modal" [id]="modalId">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New Payment Method</h5>
+                <button type="button" class="btn-close" (click)="closeModal()"></button>
+            </div>
+            <form [formGroup]="paymentMethodForm" (ngSubmit)="onSubmit()">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <input type="text" id="description" formControlName="description" class="form-control">
+                        <span *ngIf="!paymentMethodForm.get('description').valid && paymentMethodForm.get('description').touched" class="help-block">
+                            <span *ngIf="paymentMethodForm.get('description').errors['paymentMethodAlreadyExists']" class="text-danger">This payment method already exists!</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success btn-sm"
+                        [disabled]="!paymentMethodForm.valid">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

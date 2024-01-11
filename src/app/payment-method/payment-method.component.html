@@ -1,0 +1,17 @@
+<div class="row py-2">
+    <div class="md-offset-2 col-md-10">
+        <h2 class="border-bottom border-dark">Payment Methods</h2>
+    </div>
+</div>
+<div class="row py-2">
+    <app-payment-method-modal></app-payment-method-modal>
+</div>
+<div class="row py-2">
+    <div class="col-md-10 md-offset-2">
+        <ul class="list-group">
+            <li class="list-group-item list-group-item-dark" *ngFor="let paymentMethod of paymentMethods">
+                {{ paymentMethod.description }}
+            </li>
+        </ul>
+    </div>
+</div>
