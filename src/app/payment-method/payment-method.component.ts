@@ -1,5 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { Component, ElementRef, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 import { PaymentMethod } from './payment-method.model';
@@ -12,12 +11,15 @@ import { PaymentMethodService } from './payment-method.service';
 })
 export class PaymentMethodComponent implements OnInit, OnDestroy {
   paymentMethods: PaymentMethod[];
+  paymentMethodToUpdate: PaymentMethod;
+  modalId: string = 'modalPaymentMethodId';
   private paymentMethodsSubscription: Subscription;
 
-  constructor(private paymentMethodService: PaymentMethodService) { }
+  constructor(private paymentMethodService: PaymentMethodService, private renderer: Renderer2, private elementRef: ElementRef) { }
 
   ngOnInit(): void {
-    this.paymentMethods = this.paymentMethodService.getPaymentMethods();
+    this.paymentMethodToUpdate = null;
+    this.paymentMethods = this.paymentMethodService.fetchPaymentMethods();
 
     this.paymentMethodsSubscription = this.paymentMethodService.paymentMethodsChanged.subscribe((paymentMethods: PaymentMethod[]) => {
       this.paymentMethods = paymentMethods;
@@ -26,5 +28,32 @@ export class PaymentMethodComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.paymentMethodsSubscription.unsubscribe();
+  }
+
+  onAdd() {
+    this.paymentMethodToUpdate = null;
+
+    this._openModal();
+  }
+
+  onUpdate(paymentMethod) {
+    this.paymentMethodToUpdate = paymentMethod;
+
+    this._openModal();
+  }
+
+  onDelete(id: string) {
+    this.paymentMethodService.deletePaymentMethod(id);
+  }
+
+
+  private _openModal() {
+    const modalElement = this.elementRef.nativeElement.querySelector('#' + this.modalId);
+
+    if (!modalElement) {
+      return;
+    }
+
+    this.renderer.setStyle(modalElement, 'display', 'block');
   }
 }
