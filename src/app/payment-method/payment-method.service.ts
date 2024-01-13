@@ -3,13 +3,14 @@ import { PaymentMethod } from "./payment-method.model";
 import { HttpClient } from "@angular/common/http";
 import { environment } from "../../environments/environment.development";
 import { Injectable, OnInit } from "@angular/core";
+import { ToastService } from "../shared/toast/toast.service";
 
 @Injectable({ providedIn: 'root' })
 export class PaymentMethodService {
     private paymentMethods: PaymentMethod[] = [];
     paymentMethodsChanged = new BehaviorSubject<PaymentMethod[]>(this.paymentMethods);
 
-    constructor(private http: HttpClient) { }
+    constructor(private http: HttpClient, private toastService: ToastService) { }
 
     fetchPaymentMethods() {
         this._fetchPaymentMethods();
@@ -21,7 +22,7 @@ export class PaymentMethodService {
         const exists = this.paymentMethods.find(find => (find.description.toUpperCase() === paymentMethod.description.toUpperCase()));
 
         if (exists) {
-            console.log('Payment method already exists!');
+            this.toastService.createWarning('Payment method already exists!');
 
             return;
         }
@@ -33,7 +34,7 @@ export class PaymentMethodService {
         const exists = this.paymentMethods.find(find => (find.id === id));
 
         if (!exists) {
-            console.log('Unable to delete payment method because it was not found!');
+            this.toastService.createError('Error deleting payment method.');
 
             return;
         }
@@ -52,7 +53,7 @@ export class PaymentMethodService {
             )
             .pipe(
                 catchError(error => {
-                    console.log('Error fetching payment methods: ', error);
+                    this.toastService.createError('Error fetching payment methods.');
 
                     return throwError(() => {
                         new Error(error);
@@ -74,12 +75,12 @@ export class PaymentMethodService {
     private _postPaymentMethod(paymentMethod: PaymentMethod) {
         this.http
             .post<PaymentMethod>(
-                `${environment.firebaseAPI}${environment.firebasePaymentMethods}.json`, 
+                `${environment.firebaseAPI}${environment.firebasePaymentMethods}.json`,
                 paymentMethod
             )
             .pipe(
                 catchError(error => {
-                    console.log('Error posting payment method: ', error);
+                    this.toastService.createError('Error adding new payment method.')
 
                     return throwError(() => {
                         new Error(error);
@@ -88,6 +89,7 @@ export class PaymentMethodService {
             )
             .subscribe(response => {
                 this._fetchPaymentMethods();
+                this.toastService.createSuccess('Payment method created.');
             });
     }
 
@@ -98,7 +100,7 @@ export class PaymentMethodService {
             )
             .pipe(
                 catchError(error => {
-                    console.log('Error deleting payment method: ', error);
+                    this.toastService.createError('Error deleting payment method.');
 
                     return throwError(() => {
                         new Error(error);
@@ -107,18 +109,19 @@ export class PaymentMethodService {
             )
             .subscribe(() => {
                 this._fetchPaymentMethods();
+                this.toastService.createSuccess('Payment method deleted.');
             });
     }
 
     private _putPaymentMethod(paymentMethod: PaymentMethod) {
         this.http
             .put<PaymentMethod>(
-                `${environment.firebaseAPI}${environment.firebasePaymentMethods}/${paymentMethod.id}.json`, 
+                `${environment.firebaseAPI}${environment.firebasePaymentMethods}/${paymentMethod.id}.json`,
                 paymentMethod
             )
             .pipe(
                 catchError(error => {
-                    console.log('Error updating payment method: ', error);
+                    this.toastService.createError('Error updating payment method.');
 
                     return throwError(() => {
                         new Error(error);
@@ -127,6 +130,7 @@ export class PaymentMethodService {
             )
             .subscribe(() => {
                 this._fetchPaymentMethods();
+                this.toastService.createSuccess('Payment method updated.');
             });
     }
 }
