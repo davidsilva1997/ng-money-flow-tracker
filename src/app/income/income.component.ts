@@ -18,10 +18,10 @@ export class IncomeComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.financialTransactionToUpdate = null;
-    this.financialTransactionService.fetchFilter(true);
+    this.financialTransactionService.fetch();
 
     this.financialTransactionsSubscription = this.financialTransactionService.financialTransactionChanged.subscribe((financialTransactions: FinancialTransaction[]) => {
-      this.financialTransactions = financialTransactions;
+      this.financialTransactions = financialTransactions.filter(filter => (filter.isIncome));
     })
   }
 

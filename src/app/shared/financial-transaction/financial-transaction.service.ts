@@ -30,10 +30,6 @@ export class FinancialTransactionService implements OnDestroy {
         this._fetch();
     }
 
-    fetchFilter(filterIncomes: boolean) {
-        this._fetchFilter(filterIncomes);
-    }
-
     post(financialTransaction: FinancialTransaction) {
         this._post(financialTransaction);
     }
@@ -92,54 +88,6 @@ export class FinancialTransactionService implements OnDestroy {
                 }),
                 tap(financialTransactions => {
                     this.financialTransactions = financialTransactions || [];
-                    this.financialTransactionChanged.next(this.financialTransactions.slice());
-                })
-            )
-            .subscribe();
-    }
-
-    private _fetchFilter(filterIncomes: boolean) {
-        this.categoriesSubscription = this.categoryService.categoriesChanged.subscribe((categories: Category[]) => {
-            this.categories = categories;
-        });
-
-        this.paymentMethodsSubscription = this.paymentMethodService.paymentMethodsChanged.subscribe((paymentMethods: PaymentMethod[]) => {
-            this.paymentMethods = paymentMethods;
-        });
-
-        this.categoryService.fetch();
-        this.paymentMethodService.fetchPaymentMethods();
-
-        this.http
-            .get<FinancialTransaction[]>(
-                `${environment.firebaseAPI}${environment.firebaseFinancialTransactions}.json`
-            )
-            .pipe(
-                catchError(error => {
-                    this.toastService.createError('Financial Transaction', 'Error fetching financial transactions');
-
-                    return throwError(() => {
-                        new Error(error);
-                    });
-                }),
-                map(financialTransactions => {
-                    if (!financialTransactions) {
-                        return [];
-                    }
-
-                    return Object.keys(financialTransactions).map(key => {
-                        const financialTransaction = { id: key, ...financialTransactions[key] };
-                        const category = this.categories.find(find => (find.id === financialTransaction.categoryId));
-                        const paymentMethod = this.paymentMethods.find(find => (find.id === financialTransaction.paymentMethodId));
-
-                        financialTransaction.categoryId = category ? category.description : '';
-                        financialTransaction.paymentMethodId = paymentMethod ? paymentMethod.description : '';
-
-                        return financialTransaction;
-                    });
-                }),
-                tap(financialTransactions => {
-                    this.financialTransactions = financialTransactions.filter(filter => (filter.isIncome === filterIncomes)) || [];
                     this.financialTransactionChanged.next(this.financialTransactions.slice());
                 })
             )
