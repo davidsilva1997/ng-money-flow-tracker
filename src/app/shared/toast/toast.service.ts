@@ -6,9 +6,9 @@ export class ToastService {
 
     constructor(private notificationService: NotificationsService) { }
 
-    createSuccess(message) {
+    createSuccess(title, message) {
         this.notificationService.success(
-            'Success',
+            title,
             message,
             {
                 position: ['bottom', 'right'],
@@ -20,9 +20,9 @@ export class ToastService {
         );
     }
 
-    createError(message) {
+    createError(title, message) {
         this.notificationService.error(
-            'Error',
+            title,
             message,
             {
                 position: ['bottom', 'right'],
@@ -34,9 +34,9 @@ export class ToastService {
         );
     }
 
-    createWarning(message) {
+    createWarning(title, message) {
         this.notificationService.warn(
-            'Warning',
+            title,
             message,
             {
                 position: ['bottom', 'right'],

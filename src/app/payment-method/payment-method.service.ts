@@ -22,7 +22,7 @@ export class PaymentMethodService {
         const exists = this.paymentMethods.find(find => (find.description.toUpperCase() === paymentMethod.description.toUpperCase()));
 
         if (exists) {
-            this.toastService.createWarning('Payment method already exists!');
+            this.toastService.createWarning('Payment Method', 'Payment method already exists!');
 
             return;
         }
@@ -34,7 +34,7 @@ export class PaymentMethodService {
         const exists = this.paymentMethods.find(find => (find.id === id));
 
         if (!exists) {
-            this.toastService.createError('Error deleting payment method.');
+            this.toastService.createError('Payment Method', 'Error deleting payment method.');
 
             return;
         }
@@ -53,7 +53,7 @@ export class PaymentMethodService {
             )
             .pipe(
                 catchError(error => {
-                    this.toastService.createError('Error fetching payment methods.');
+                    this.toastService.createError('Payment Method', 'Error fetching payment methods.');
 
                     return throwError(() => {
                         new Error(error);
@@ -80,7 +80,7 @@ export class PaymentMethodService {
             )
             .pipe(
                 catchError(error => {
-                    this.toastService.createError('Error adding new payment method.')
+                    this.toastService.createError('Payment Method', 'Error adding new payment method.')
 
                     return throwError(() => {
                         new Error(error);
@@ -89,7 +89,7 @@ export class PaymentMethodService {
             )
             .subscribe(response => {
                 this._fetchPaymentMethods();
-                this.toastService.createSuccess('Payment method created.');
+                this.toastService.createSuccess('Payment Method', 'Payment method created.');
             });
     }
 
@@ -100,7 +100,7 @@ export class PaymentMethodService {
             )
             .pipe(
                 catchError(error => {
-                    this.toastService.createError('Error deleting payment method.');
+                    this.toastService.createError('Payment Method', 'Error deleting payment method.');
 
                     return throwError(() => {
                         new Error(error);
@@ -109,7 +109,7 @@ export class PaymentMethodService {
             )
             .subscribe(() => {
                 this._fetchPaymentMethods();
-                this.toastService.createSuccess('Payment method deleted.');
+                this.toastService.createSuccess('Payment Method', 'Payment method deleted.');
             });
     }
 
@@ -121,7 +121,7 @@ export class PaymentMethodService {
             )
             .pipe(
                 catchError(error => {
-                    this.toastService.createError('Error updating payment method.');
+                    this.toastService.createError('Payment Method', 'Error updating payment method.');
 
                     return throwError(() => {
                         new Error(error);
@@ -130,7 +130,7 @@ export class PaymentMethodService {
             )
             .subscribe(() => {
                 this._fetchPaymentMethods();
-                this.toastService.createSuccess('Payment method updated.');
+                this.toastService.createSuccess('Payment Method', 'Payment method updated.');
             });
     }
 }
