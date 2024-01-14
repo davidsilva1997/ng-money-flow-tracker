@@ -9,6 +9,11 @@ import { AppComponent } from './app.component';
 import { HeaderComponent } from './header/header.component';
 import { PaymentMethodComponent } from './payment-method/payment-method.component';
 import { PaymentMethodModalComponent } from './payment-method/payment-method-modal/payment-method-modal.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { IncomeComponent } from './income/income.component';
+import { ExpenseComponent } from './expense/expense.component';
+import { SettingsComponent } from './settings/settings.component';
+import { AppRoutingModule } from './app-routing.model';
 
 @NgModule({
   declarations: [
@@ -16,13 +21,18 @@ import { PaymentMethodModalComponent } from './payment-method/payment-method-mod
     HeaderComponent,
     PaymentMethodComponent,
     PaymentMethodModalComponent,
+    DashboardComponent,
+    IncomeComponent,
+    ExpenseComponent,
+    SettingsComponent,
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
     ReactiveFormsModule,
     SimpleNotificationsModule.forRoot(),
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    AppRoutingModule
   ],
   providers: [],
   bootstrap: [AppComponent]
