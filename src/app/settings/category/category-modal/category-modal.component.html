@@ -1,0 +1,25 @@
+<div class="modal" [id]="modalId">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ modalTitle }}</h5>
+                <button type="button" class="btn-close" (click)="onCloseModal()"></button>
+            </div>
+            <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <input type="text" id="description" formControlName="description" class="form-control">
+                        <span *ngIf="!categoryForm.get('description').valid && categoryForm.get('description').touched" class="help-block">
+                            <span *ngIf="categoryForm.get('description').errors['categoryAlreadyExists']" class="text-danger">This category already exists!</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success btn-sm"
+                        [disabled]="!categoryForm.valid">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

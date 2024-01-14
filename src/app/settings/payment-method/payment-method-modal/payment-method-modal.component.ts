@@ -27,12 +27,7 @@ export class PaymentMethodModalComponent implements OnInit, OnChanges {
       this.existingPaymentMethodsDescriptions = paymentMethods.map(map => map.description.toUpperCase());
     });
 
-    if (this.paymentMethod) {
-      this.modalTitle = 'Update Payment Method';
-    }
-    else {
-      this.modalTitle = 'New Payment Method';
-    }
+    this.modalTitle = (this.paymentMethod) ? 'Update Payment Method' : 'New Payment Method';
 
     this.paymentMethodForm = new FormGroup({
       'description': new FormControl('', [Validators.required, this.validatePaymentMethods.bind(this)])
