@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnChanges, OnInit, Renderer2, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, OnDestroy, OnInit, Renderer2, SimpleChanges } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { PaymentMethodService } from '../payment-method.service';
@@ -9,7 +9,7 @@ import { PaymentMethod } from '../payment-method.model';
   templateUrl: './payment-method-modal.component.html',
   styleUrl: './payment-method-modal.component.css'
 })
-export class PaymentMethodModalComponent implements OnInit, OnChanges {
+export class PaymentMethodModalComponent implements OnInit, OnDestroy, OnChanges {
   @Input('modalId') modalId: string;
   @Input('paymentMethod') paymentMethod: PaymentMethod;
 
@@ -32,6 +32,10 @@ export class PaymentMethodModalComponent implements OnInit, OnChanges {
     this.paymentMethodForm = new FormGroup({
       'description': new FormControl('', [Validators.required, this.validatePaymentMethods.bind(this)])
     });
+  }
+
+  ngOnDestroy(): void {
+    this.paymentMethodsSubscription.unsubscribe();
   }
 
   ngOnChanges(changes: SimpleChanges): void {

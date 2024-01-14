@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnChanges, OnInit, Renderer2, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, OnDestroy, OnInit, Renderer2, SimpleChanges } from '@angular/core';
 
 import { Category } from '../category.model';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
@@ -10,7 +10,7 @@ import { CategoryService } from '../category.service';
   templateUrl: './category-modal.component.html',
   styleUrl: './category-modal.component.css'
 })
-export class CategoryModalComponent implements OnInit, OnChanges {
+export class CategoryModalComponent implements OnInit, OnDestroy, OnChanges {
   @Input('modalId') modalId: string;
   @Input('category') category: Category;
   modalTitle: string = 'New Category';
@@ -32,6 +32,10 @@ export class CategoryModalComponent implements OnInit, OnChanges {
     this.categoryForm = new FormGroup({
       'description': new FormControl('', [Validators.required, this.validateCategories.bind(this)])
     });
+  }
+
+  ngOnDestroy(): void {
+    this.categoriesSubscription.unsubscribe();
   }
 
   ngOnChanges(changes: SimpleChanges): void {

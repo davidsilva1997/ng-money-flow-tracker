@@ -16,6 +16,7 @@ import { SettingsComponent } from './settings/settings.component';
 import { AppRoutingModule } from './app-routing.model';
 import { CategoryComponent } from './settings/category/category.component';
 import { CategoryModalComponent } from './settings/category/category-modal/category-modal.component';
+import { FinancialTransactionModalComponent } from './shared/financial-transaction/financial-transaction-modal/financial-transaction-modal.component';
 
 @NgModule({
   declarations: [
@@ -29,6 +30,7 @@ import { CategoryModalComponent } from './settings/category/category-modal/categ
     SettingsComponent,
     CategoryComponent,
     CategoryModalComponent,
+    FinancialTransactionModalComponent,
   ],
   imports: [
     BrowserModule,
