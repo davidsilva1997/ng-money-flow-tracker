@@ -24,12 +24,12 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let financialTransaction of financialTransactions">
+                <tr *ngFor="let financialTransaction of financialTransactionsSubject | async">
                     <td>{{ financialTransaction.description }}</td>
                     <td>{{ financialTransaction.amount | currency:'EUR' }}</td>
                     <td>{{ financialTransaction.date | date: 'dd MMM yyyy' }}</td>
-                    <td>{{ financialTransaction.categoryId }}</td>
-                    <td>{{ financialTransaction.paymentMethodId }}</td>
+                    <td>{{ financialTransaction.category }}</td>
+                    <td>{{ financialTransaction.paymentMethod }}</td>
                     <td>{{ financialTransaction.notes }}</td>
                     <td><span *ngFor="let tag of financialTransaction.tags" class="badge bg-secondary">{{ tag }}</span></td>
                     <td>

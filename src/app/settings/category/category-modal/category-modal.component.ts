@@ -28,10 +28,6 @@ export class CategoryModalComponent implements OnInit, OnChanges {
 
     this.categoriesDescriptionSubject = new BehaviorSubject<string[]>([]);
 
-    // this.categoryService.fetch().subscribe(categories => {
-    //   this.categoriesDescriptionSubject.next(categories.map(map => map.description.toUpperCase()));
-    // });
-
     this.categoryService.categoriesChangedSubject.subscribe(() => {
       this.categoryService.fetch().subscribe(categories => {
         this.categoriesDescriptionSubject.next(categories.map(map => map.description.toUpperCase()));

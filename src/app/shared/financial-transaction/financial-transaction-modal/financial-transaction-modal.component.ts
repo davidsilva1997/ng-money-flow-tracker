@@ -1,47 +1,33 @@
 import { Component, ElementRef, Input, OnChanges, OnDestroy, OnInit, Renderer2, SimpleChanges } from '@angular/core';
 
 import { FinancialTransaction } from './financial-transaction.model';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { FinancialTransactionService } from '../financial-transaction.service';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CategoryService } from '../../../settings/category/category.service';
 import { Category } from '../../../settings/category/category.model';
 import { PaymentMethod } from '../../../settings/payment-method/payment-method.model';
 import { PaymentMethodService } from '../../../settings/payment-method/payment-method.service';
+import { ToastService } from '../../toast/toast.service';
 
 @Component({
   selector: 'app-financial-transaction-modal',
   templateUrl: './financial-transaction-modal.component.html',
   styleUrl: './financial-transaction-modal.component.css'
 })
-export class FinancialTransactionModalComponent implements OnInit, OnDestroy, OnChanges {
+export class FinancialTransactionModalComponent implements OnInit, OnChanges {
   @Input('modalId') modalId: string;
   @Input('financialTransaction') financialTransaction: FinancialTransaction;
   @Input('isIncome') isIncome: boolean;
-
-  modalTitle: string = 'New Financial Transaction';
+  modalTitle: string;
   financialTransactionForm: FormGroup;
-  categories: Category[];
-  paymentMethods: PaymentMethod[];
-  private categoriesSubscription: Subscription;
-  private paymentMethodsSubscription: Subscription;
-  private financialTransactionsSubscription: Subscription;
+  categoriesSubject: BehaviorSubject<Category[]>;
+  paymentMethodsSubject: BehaviorSubject<PaymentMethod[]>;
 
-  constructor(private financialTransactionService: FinancialTransactionService, private categoryService: CategoryService, private paymentMethodService: PaymentMethodService, private renderer: Renderer2, private elementRef: ElementRef) { }
+  constructor(private financialTransactionService: FinancialTransactionService, private categoryService: CategoryService, private paymentMethodService: PaymentMethodService, private toastService: ToastService, private renderer: Renderer2, private elementRef: ElementRef) { }
 
   ngOnInit(): void {
     this.modalTitle = (this.financialTransaction) ? 'Update Financial Transaction' : 'New Financial Transaction';
-
-    this.categoryService.fetch();
-    // this.categoriesSubscription = this.categoryService.categoriesChanged.subscribe((categories: Category[]) => {
-    //   this.categories = categories;
-    // });
-
-    this.paymentMethodService.fetch();
-    // this.paymentMethodsSubscription = this.paymentMethodService.paymentMethodsChanged.subscribe((paymentMethods: PaymentMethod[]) => {
-    //   this.paymentMethods = paymentMethods;
-    // });
-
     this.financialTransactionForm = new FormGroup({
       'description': new FormControl<string>('', [Validators.required]),
       'amount': new FormControl<number>(null, [Validators.required, Validators.min(0.01)]),
@@ -51,16 +37,17 @@ export class FinancialTransactionModalComponent implements OnInit, OnDestroy, On
       'notes': new FormControl<string>(''),
       'tags': new FormArray([]),
     });
-  }
 
-  ngOnDestroy(): void {
-    if (this.financialTransactionsSubscription) {
-      this.financialTransactionsSubscription.unsubscribe();
-    }
+    this.categoriesSubject = new BehaviorSubject<Category[]>([]);
+    this.paymentMethodsSubject = new BehaviorSubject<PaymentMethod[]>([]);
 
-    if (this.categoriesSubscription) {
-      this.categoriesSubscription.unsubscribe();
-    }
+    this.categoryService.fetch().subscribe(categories => {
+      this.categoriesSubject.next(categories);
+    });
+
+    this.paymentMethodService.fetch().subscribe(paymentMethods => {
+      this.paymentMethodsSubject.next(paymentMethods);
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -76,9 +63,11 @@ export class FinancialTransactionModalComponent implements OnInit, OnDestroy, On
           'notes': changes.financialTransaction.currentValue.notes,
           'tags': changes.financialTransaction.currentValue.tags
         });
+
+        console.log(this.financialTransactionForm);
       }
       else {
-        this.modalTitle = 'Update Financial Transaction';
+        this.modalTitle = 'New Financial Transaction';
         if (this.financialTransactionForm) {
           this.financialTransactionForm.reset();
         }
@@ -108,7 +97,15 @@ export class FinancialTransactionModalComponent implements OnInit, OnDestroy, On
       this.financialTransaction.notes = notes;
       this.financialTransaction.tags = tags;
 
-      //
+      this.financialTransactionService.put(this.financialTransaction).subscribe({
+        next: () => {
+          this.toastService.createSuccess('Financial Transaction', 'Financial Transaction updated successfully.');
+          this.financialTransactionService.financialTransactionsChangedSubject.next();
+        },
+        error: (error) => {
+          this.toastService.createError('Financial Transaction', 'Error updating financial transaction.');
+        }
+      });
     }
     else {
       const newFinancialTransaction = new FinancialTransaction(
@@ -123,21 +120,19 @@ export class FinancialTransactionModalComponent implements OnInit, OnDestroy, On
         this.isIncome
       );
 
-      this.financialTransactionService.post(newFinancialTransaction);
+      this.financialTransactionService.post(newFinancialTransaction).subscribe({
+        next: () => {
+          this.toastService.createSuccess('Financial Transaction', 'New financial transaction created successfully.');
+          this.financialTransactionService.financialTransactionsChangedSubject.next();
+        },
+        error: (error) => {
+          this.toastService.createError('Financial Transaction', 'Error creating the new financial transaction.');
+        }
+      });
     }
 
     this.financialTransactionForm.reset();
     this.onCloseModal();
-  }
-
-  onCloseModal() {
-    const modalElement = this.elementRef.nativeElement.querySelector('#' + this.modalId);
-
-    if (!modalElement) {
-      return;
-    }
-
-    this.renderer.setStyle(modalElement, 'display', 'none');
   }
 
   getTags() {
@@ -148,5 +143,16 @@ export class FinancialTransactionModalComponent implements OnInit, OnDestroy, On
     const control = new FormControl(null, Validators.required);
 
     (<FormArray>this.financialTransactionForm.get('tags')).push(control);
+  }
+
+  onCloseModal() {
+    const modalElement = this.elementRef.nativeElement.querySelector('#' + this.modalId);
+
+    if (!modalElement) {
+      return;
+    }
+
+    this.renderer.setStyle(modalElement, 'display', 'none');
+    this.financialTransactionForm.reset();
   }
 }

@@ -13,14 +13,13 @@ export class CategoryComponent implements OnInit, OnDestroy {
   categoriesSubject: BehaviorSubject<Category[]>;
   private categoriesChanged: Subscription;
 
-  categoryToUpdate: Category;
   modalId: string = 'modalCategoryId';
+  categoryToUpdate: Category;
 
   constructor(private categoryService: CategoryService, private toastService: ToastService , private renderer: Renderer2, private elementRef: ElementRef) { }
 
   ngOnInit(): void {
     this.categoriesSubject = new BehaviorSubject<Category[]>([]);
-
     this.categoryToUpdate = null;
 
     this.categoryService.fetch().subscribe(categories => {
