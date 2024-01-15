@@ -45,7 +45,6 @@ export class IncomeComponent implements OnInit, OnDestroy {
     this.financialTransactionsChanged = this.financialTransactionService.financialTransactionsChangedSubject.subscribe(() => {
       this._refreshFinancialTransactions();
     });
-
   }
 
   ngOnDestroy(): void {
@@ -95,19 +94,19 @@ export class IncomeComponent implements OnInit, OnDestroy {
           return;
         }
 
-        const category = this.categoriesSubject.value.find(find => (find.id === financialTransaction.categoryId)).description;
+        const category = this.categoriesSubject.value.find(find => (find.id === financialTransaction.categoryId));
 
         if (!this.paymentMethodsSubject.value) {
           return;
         }
 
-        const paymentMethod = this.paymentMethodsSubject.value.find(find => (find.id === financialTransaction.paymentMethodId)).description;
+        const paymentMethod = this.paymentMethodsSubject.value.find(find => (find.id === financialTransaction.paymentMethodId));
 
-        financialTransaction.category = category || 'unknown';
-        financialTransaction.paymentMethod = paymentMethod || 'unknown';
+        financialTransaction.category = (category) ? category.description : 'unknown';
+        financialTransaction.paymentMethod = (paymentMethod) ? paymentMethod.description : 'unknown';
       });
 
-      this.financialTransactionsSubject.next(financialTransactions);
+      this.financialTransactionsSubject.next(financialTransactions.filter(filter => filter.isIncome));
     })
   }
 }
