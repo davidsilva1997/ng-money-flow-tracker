@@ -88,25 +88,28 @@ export class ExpenseComponent implements OnInit, OnDestroy {
   }
 
   private _refreshFinancialTransactions() {
-    this.financialTransactionService.fetch().subscribe(financialTransactions => {
-      financialTransactions.forEach(financialTransaction => {
-        if (!this.categoriesSubject.value) {
-          return;
+    this.financialTransactionService.fetch().subscribe(response => {
+      response.financialTransactions.forEach(financialTransaction => {
+        let categoryDescription;
+        let paymentMethodDescription;
+
+        if (response.categories) {
+          let category = response.categories.find(find => (find.id === financialTransaction.categoryId));
+
+          categoryDescription = (category) ? category.description : 'unknown';
         }
 
-        const category = this.categoriesSubject.value.find(find => (find.id === financialTransaction.categoryId));
+        if (response.paymentMethods) {
+          let paymentMethod = response.paymentMethods.find(find => (find.id === financialTransaction.paymentMethodId));
 
-        if (!this.paymentMethodsSubject.value) {
-          return;
+          paymentMethodDescription = (paymentMethod) ? paymentMethod.description : 'unknown';
         }
 
-        const paymentMethod = this.paymentMethodsSubject.value.find(find => (find.id === financialTransaction.paymentMethodId));
-
-        financialTransaction.category = (category) ? category.description : 'unknown';
-        financialTransaction.paymentMethod = (paymentMethod) ? paymentMethod.description : 'unknown';
+        financialTransaction.category = categoryDescription;
+        financialTransaction.paymentMethod = paymentMethodDescription;
       });
 
-      this.financialTransactionsSubject.next(financialTransactions.filter(filter => !filter.isIncome));
+      this.financialTransactionsSubject.next(response.financialTransactions.filter(filter => !filter.isIncome));
     })
   }
 }
