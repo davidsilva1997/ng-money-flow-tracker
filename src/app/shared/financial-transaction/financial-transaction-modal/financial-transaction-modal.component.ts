@@ -37,10 +37,10 @@ export class FinancialTransactionModalComponent implements OnInit, OnDestroy, On
     //   this.categories = categories;
     // });
 
-    this.paymentMethodService.fetchPaymentMethods();
-    this.paymentMethodsSubscription = this.paymentMethodService.paymentMethodsChanged.subscribe((paymentMethods: PaymentMethod[]) => {
-      this.paymentMethods = paymentMethods;
-    });
+    this.paymentMethodService.fetch();
+    // this.paymentMethodsSubscription = this.paymentMethodService.paymentMethodsChanged.subscribe((paymentMethods: PaymentMethod[]) => {
+    //   this.paymentMethods = paymentMethods;
+    // });
 
     this.financialTransactionForm = new FormGroup({
       'description': new FormControl<string>('', [Validators.required]),

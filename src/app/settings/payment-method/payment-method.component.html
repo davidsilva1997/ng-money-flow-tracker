@@ -15,7 +15,7 @@
     <div class="col-md-10 md-offset-2">
         <ul class="list-group">
             <li class="list-group-item list-group-item-dark d-flex justify-content-between align-items-center"
-                *ngFor="let paymentMethod of paymentMethods">
+                *ngFor="let paymentMethod of paymentMethodsSubject | async">
                 {{ paymentMethod.description }}
                 <div>
                     <button class="btn btn-warning btn-sm margin-right-5"

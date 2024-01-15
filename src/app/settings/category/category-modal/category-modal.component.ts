@@ -2,7 +2,7 @@ import { Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnIni
 
 import { Category } from '../category.model';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { CategoryService } from '../category.service';
 import { ToastService } from '../../../shared/toast/toast.service';
 
@@ -28,8 +28,14 @@ export class CategoryModalComponent implements OnInit, OnChanges {
 
     this.categoriesDescriptionSubject = new BehaviorSubject<string[]>([]);
 
-    this.categoryService.fetch().subscribe(categories => {
-      this.categoriesDescriptionSubject.next(categories.map(map => map.description.toUpperCase()));
+    // this.categoryService.fetch().subscribe(categories => {
+    //   this.categoriesDescriptionSubject.next(categories.map(map => map.description.toUpperCase()));
+    // });
+
+    this.categoryService.categoriesChangedSubject.subscribe(() => {
+      this.categoryService.fetch().subscribe(categories => {
+        this.categoriesDescriptionSubject.next(categories.map(map => map.description.toUpperCase()));
+      });
     });
   }
 
@@ -70,9 +76,9 @@ export class CategoryModalComponent implements OnInit, OnChanges {
       });
     }
     else {
-      const newPaymentMethod = new Category(null, description);
+      const newCategory = new Category(null, description);
 
-      this.categoryService.post(newPaymentMethod).subscribe({
+      this.categoryService.post(newCategory).subscribe({
         next: () => {
           this.toastService.createSuccess('Category', 'New category created successfully.');
           this.categoryService.categoriesChangedSubject.next();

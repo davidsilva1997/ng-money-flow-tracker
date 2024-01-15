@@ -51,12 +51,12 @@ export class FinancialTransactionService implements OnDestroy {
         //     this.categories = categories;
         // });
 
-        this.paymentMethodsSubscription = this.paymentMethodService.paymentMethodsChanged.subscribe((paymentMethods: PaymentMethod[]) => {
-            this.paymentMethods = paymentMethods;
-        });
+        // this.paymentMethodsSubscription = this.paymentMethodService.paymentMethodsChanged.subscribe((paymentMethods: PaymentMethod[]) => {
+        //     this.paymentMethods = paymentMethods;
+        // });
 
         this.categoryService.fetch();
-        this.paymentMethodService.fetchPaymentMethods();
+        this.paymentMethodService.fetch();
 
         this.http
             .get<FinancialTransaction[]>(

@@ -1,8 +1,9 @@
 import { Component, ElementRef, OnDestroy, OnInit, Renderer2 } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 
 import { PaymentMethod } from './payment-method.model';
 import { PaymentMethodService } from './payment-method.service';
+import { ToastService } from '../../shared/toast/toast.service';
 
 @Component({
   selector: 'app-payment-method',
@@ -10,24 +11,31 @@ import { PaymentMethodService } from './payment-method.service';
   styleUrl: './payment-method.component.css'
 })
 export class PaymentMethodComponent implements OnInit, OnDestroy {
-  paymentMethods: PaymentMethod[];
-  paymentMethodToUpdate: PaymentMethod;
-  modalId: string = 'modalPaymentMethodId';
-  private paymentMethodsSubscription: Subscription;
+  paymentMethodsSubject: BehaviorSubject<PaymentMethod[]>;
+  private paymentMethodsChanged: Subscription;
 
-  constructor(private paymentMethodService: PaymentMethodService, private renderer: Renderer2, private elementRef: ElementRef) { }
+  modalId: string = 'modalPaymentMethodId';
+  paymentMethodToUpdate: PaymentMethod;
+
+  constructor(private paymentMethodService: PaymentMethodService, private toastService: ToastService, private renderer: Renderer2, private elementRef: ElementRef) { }
 
   ngOnInit(): void {
+    this.paymentMethodsSubject = new BehaviorSubject<PaymentMethod[]>([]);
     this.paymentMethodToUpdate = null;
-    this.paymentMethods = this.paymentMethodService.fetchPaymentMethods();
 
-    this.paymentMethodsSubscription = this.paymentMethodService.paymentMethodsChanged.subscribe((paymentMethods: PaymentMethod[]) => {
-      this.paymentMethods = paymentMethods;
+    this.paymentMethodService.fetch().subscribe(paymentMethods => {
+      this.paymentMethodsSubject.next(paymentMethods);
+    });
+
+    this.paymentMethodsChanged = this.paymentMethodService.paymentMethodsChangedSubject.subscribe(() => {
+      this._refreshPaymentMethods();
     });
   }
 
   ngOnDestroy(): void {
-    this.paymentMethodsSubscription.unsubscribe();
+    if (this.paymentMethodsChanged) {
+      this.paymentMethodsChanged.unsubscribe();
+    }
   }
 
   onAdd() {
@@ -36,16 +44,23 @@ export class PaymentMethodComponent implements OnInit, OnDestroy {
     this._openModal();
   }
 
-  onUpdate(paymentMethod) {
+  onUpdate(paymentMethod: PaymentMethod) {
     this.paymentMethodToUpdate = paymentMethod;
 
     this._openModal();
   }
 
   onDelete(id: string) {
-    this.paymentMethodService.deletePaymentMethod(id);
+    this.paymentMethodService.delete(id).subscribe({
+      next: () => {
+        this.toastService.createSuccess('Payment Method', 'Payment method deleted successfully.')
+        this._refreshPaymentMethods();
+      },
+      error: (error) => {
+        this.toastService.createError('Payment Method', 'Error deleting payment method.');
+      }
+    });
   }
-
 
   private _openModal() {
     const modalElement = this.elementRef.nativeElement.querySelector('#' + this.modalId);
@@ -55,5 +70,11 @@ export class PaymentMethodComponent implements OnInit, OnDestroy {
     }
 
     this.renderer.setStyle(modalElement, 'display', 'block');
+  }
+
+  private _refreshPaymentMethods() {
+    this.paymentMethodService.fetch().subscribe(paymentMethods => {
+      this.paymentMethodsSubject.next(paymentMethods);
+    });
   }
 }
