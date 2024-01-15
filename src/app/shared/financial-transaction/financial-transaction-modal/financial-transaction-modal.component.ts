@@ -33,9 +33,9 @@ export class FinancialTransactionModalComponent implements OnInit, OnDestroy, On
     this.modalTitle = (this.financialTransaction) ? 'Update Financial Transaction' : 'New Financial Transaction';
 
     this.categoryService.fetch();
-    this.categoriesSubscription = this.categoryService.categoriesChanged.subscribe((categories: Category[]) => {
-      this.categories = categories;
-    });
+    // this.categoriesSubscription = this.categoryService.categoriesChanged.subscribe((categories: Category[]) => {
+    //   this.categories = categories;
+    // });
 
     this.paymentMethodService.fetchPaymentMethods();
     this.paymentMethodsSubscription = this.paymentMethodService.paymentMethodsChanged.subscribe((paymentMethods: PaymentMethod[]) => {

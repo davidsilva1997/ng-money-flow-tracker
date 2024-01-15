@@ -1,41 +1,36 @@
-import { Component, ElementRef, Input, OnChanges, OnDestroy, OnInit, Renderer2, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges } from '@angular/core';
 
 import { Category } from '../category.model';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { CategoryService } from '../category.service';
+import { ToastService } from '../../../shared/toast/toast.service';
 
 @Component({
   selector: 'app-category-modal',
   templateUrl: './category-modal.component.html',
   styleUrl: './category-modal.component.css'
 })
-export class CategoryModalComponent implements OnInit, OnDestroy, OnChanges {
+export class CategoryModalComponent implements OnInit, OnChanges {
   @Input('modalId') modalId: string;
   @Input('category') category: Category;
-  modalTitle: string = 'New Category';
+  modalTitle: string;
   categoryForm: FormGroup;
-  existingCategoriesDescriptions: string[];
-  private categoriesSubscription: Subscription;
+  categoriesDescriptionSubject: BehaviorSubject<string[]>;
 
-  constructor(private categoryService: CategoryService, private renderer: Renderer2, private elementRef: ElementRef) { }
+  constructor(private categoryService: CategoryService, private toastService: ToastService, private renderer: Renderer2, private elementRef: ElementRef) { }
 
   ngOnInit(): void {
-    this.existingCategoriesDescriptions = this.categoryService.fetch().map(map => map.description.toUpperCase());
-
-    this.categoriesSubscription = this.categoryService.categoriesChanged.subscribe((categories: Category[]) => {
-      this.existingCategoriesDescriptions = categories.map(map => map.description.toUpperCase());
-    });
-
     this.modalTitle = (this.category) ? 'Update Category' : 'New Category';
-
     this.categoryForm = new FormGroup({
       'description': new FormControl('', [Validators.required, this.validateCategories.bind(this)])
     });
-  }
 
-  ngOnDestroy(): void {
-    this.categoriesSubscription.unsubscribe();
+    this.categoriesDescriptionSubject = new BehaviorSubject<string[]>([]);
+
+    this.categoryService.fetch().subscribe(categories => {
+      this.categoriesDescriptionSubject.next(categories.map(map => map.description.toUpperCase()));
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -49,9 +44,7 @@ export class CategoryModalComponent implements OnInit, OnDestroy, OnChanges {
       else {
         this.modalTitle = 'New Category';
         if (this.categoryForm) {
-          this.categoryForm.patchValue({
-            'description': changes.category.currentValue.description
-          });
+          this.categoryForm.reset();
         }
       }
     }
@@ -66,26 +59,32 @@ export class CategoryModalComponent implements OnInit, OnDestroy, OnChanges {
 
     if (this.category) {
       this.category.description = description;
-      this.categoryService.put(this.category);
+      this.categoryService.put(this.category).subscribe({
+        next: () => {
+          this.toastService.createSuccess('Category', 'Category updated successfully.');
+          this.categoryService.categoriesChangedSubject.next();
+        },
+        error: (error) => {
+          this.toastService.createError('Category', 'Error updating category.');
+        }
+      });
     }
     else {
       const newPaymentMethod = new Category(null, description);
 
-      this.categoryService.post(newPaymentMethod);
+      this.categoryService.post(newPaymentMethod).subscribe({
+        next: () => {
+          this.toastService.createSuccess('Category', 'New category created successfully.');
+          this.categoryService.categoriesChangedSubject.next();
+        },
+        error: (error) => {
+          this.toastService.createError('Category', 'Error creating the new category.');
+        }
+      });
     }
 
     this.categoryForm.reset();
     this.onCloseModal();
-  }
-
-  validateCategories(control: FormControl): { [s: string]: boolean } {
-    const description = control.value ? control.value.toUpperCase() : control.value;
-
-    if (this.existingCategoriesDescriptions.indexOf(description) !== -1) {
-      return { 'categoryAlreadyExists': true }
-    }
-
-    return null;
   }
 
   onCloseModal() {
@@ -97,5 +96,15 @@ export class CategoryModalComponent implements OnInit, OnDestroy, OnChanges {
 
     this.renderer.setStyle(modalElement, 'display', 'none');
     this.categoryForm.reset();
+  }
+
+  validateCategories(control: FormControl): { [s: string]: boolean } {
+    const description = control.value ? control.value.toUpperCase() : control.value;
+
+    if (this.categoriesDescriptionSubject && (this.categoriesDescriptionSubject.value.indexOf(description) !== -1)) {
+      return { 'categoryAlreadyExists': true }
+    }
+
+    return null;
   }
 }

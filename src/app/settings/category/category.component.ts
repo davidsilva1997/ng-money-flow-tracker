@@ -1,7 +1,8 @@
 import { Component, ElementRef, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { Category } from './category.model';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { CategoryService } from './category.service';
+import { ToastService } from '../../shared/toast/toast.service';
 
 @Component({
   selector: 'app-category',
@@ -9,25 +10,32 @@ import { CategoryService } from './category.service';
   styleUrl: './category.component.css'
 })
 export class CategoryComponent implements OnInit, OnDestroy {
-  categories: Category[];
+  categoriesSubject: BehaviorSubject<Category[]>;
+  private categoriesChanged: Subscription;
+
   categoryToUpdate: Category;
   modalId: string = 'modalCategoryId';
-  private categoriesSubscription: Subscription;
 
-  constructor(private categoryService: CategoryService, private renderer: Renderer2, private elementRef: ElementRef) { }
-
+  constructor(private categoryService: CategoryService, private toastService: ToastService , private renderer: Renderer2, private elementRef: ElementRef) { }
 
   ngOnInit(): void {
-    this.categoryToUpdate = null;
-    this.categories = this.categoryService.fetch();
+    this.categoriesSubject = new BehaviorSubject<Category[]>([]);
 
-    this.categoriesSubscription = this.categoryService.categoriesChanged.subscribe((categories: Category[]) => {
-      this.categories = categories;
+    this.categoryToUpdate = null;
+
+    this.categoryService.fetch().subscribe(categories => {
+      this.categoriesSubject.next(categories);
+    });
+
+    this.categoriesChanged = this.categoryService.categoriesChangedSubject.subscribe(() => {
+      this._refreshCategories();
     });
   }
 
   ngOnDestroy(): void {
-    this.categoriesSubscription.unsubscribe();
+    if (this.categoriesSubject) {
+      this.categoriesChanged.unsubscribe();
+    }
   }
 
   onAdd() {
@@ -43,7 +51,15 @@ export class CategoryComponent implements OnInit, OnDestroy {
   }
 
   onDelete(id: string) {
-    this.categoryService.delete(id);
+    this.categoryService.delete(id).subscribe({
+      next: () => {
+        this.toastService.createSuccess('Category', 'Category deleted successfully.')
+        this._refreshCategories();
+      },
+      error: (error) => {
+        this.toastService.createError('Category', 'Error deleting category.');
+      }
+    });
   }
 
   private _openModal() {
@@ -54,5 +70,11 @@ export class CategoryComponent implements OnInit, OnDestroy {
     }
 
     this.renderer.setStyle(modalElement, 'display', 'block');
+  }
+
+  private _refreshCategories() {
+    this.categoryService.fetch().subscribe(categories => {
+      this.categoriesSubject.next(categories);
+    });
   }
 }

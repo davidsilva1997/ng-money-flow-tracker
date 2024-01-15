@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy, OnInit } from "@angular/core";
-import { BehaviorSubject, Subscription, catchError, map, tap, throwError } from "rxjs";
+import { BehaviorSubject, Subscription, catchError, forkJoin, map, switchMap, tap, throwError } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 
 import { FinancialTransaction } from "./financial-transaction-modal/financial-transaction.model";
@@ -47,9 +47,9 @@ export class FinancialTransactionService implements OnDestroy {
     }
 
     private _fetch() {
-        this.categoriesSubscription = this.categoryService.categoriesChanged.subscribe((categories: Category[]) => {
-            this.categories = categories;
-        });
+        // this.categoriesSubscription = this.categoryService.categoriesChanged.subscribe((categories: Category[]) => {
+        //     this.categories = categories;
+        // });
 
         this.paymentMethodsSubscription = this.paymentMethodService.paymentMethodsChanged.subscribe((paymentMethods: PaymentMethod[]) => {
             this.paymentMethods = paymentMethods;
