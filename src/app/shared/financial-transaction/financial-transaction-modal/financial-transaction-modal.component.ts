@@ -53,6 +53,9 @@ export class FinancialTransactionModalComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.financialTransaction) {
       if (changes.financialTransaction.currentValue) {
+        this._deleteTags();
+        this._refreshTags(changes.financialTransaction.currentValue.tags);
+
         this.modalTitle = 'Update Financial Transaction';
         this.financialTransactionForm.patchValue({
           'description': changes.financialTransaction.currentValue.description,
@@ -60,16 +63,14 @@ export class FinancialTransactionModalComponent implements OnInit, OnChanges {
           'date': changes.financialTransaction.currentValue.date,
           'categoryId': changes.financialTransaction.currentValue.categoryId,
           'paymentMethodId': changes.financialTransaction.currentValue.paymentMethodId,
-          'notes': changes.financialTransaction.currentValue.notes,
-          'tags': changes.financialTransaction.currentValue.tags
+          'notes': changes.financialTransaction.currentValue.notes
         });
-
-        console.log(this.financialTransactionForm);
       }
       else {
         this.modalTitle = 'New Financial Transaction';
         if (this.financialTransactionForm) {
           this.financialTransactionForm.reset();
+          this._deleteTags();
         }
       }
     }
@@ -143,6 +144,24 @@ export class FinancialTransactionModalComponent implements OnInit, OnChanges {
     const control = new FormControl(null, Validators.required);
 
     (<FormArray>this.financialTransactionForm.get('tags')).push(control);
+  }
+
+  private _deleteTags() {
+    const tagsArray = this.financialTransactionForm.get('tags') as FormArray;
+
+    while (tagsArray.length) {
+      tagsArray.removeAt(0);
+    }
+  }
+
+  private _refreshTags(tags: string[]) {
+    if (tags) {
+      tags.forEach(tag => {
+        const control = new FormControl(tag, Validators.required);
+
+        (<FormArray>this.financialTransactionForm.get('tags')).push(control);
+      });
+    }
   }
 
   onCloseModal() {
