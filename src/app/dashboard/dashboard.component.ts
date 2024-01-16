@@ -26,7 +26,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.financialTransactionsChanged){
+    if (this.financialTransactionsChanged) {
       this.financialTransactionsChanged.unsubscribe();
     }
   }

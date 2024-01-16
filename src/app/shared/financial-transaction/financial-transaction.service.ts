@@ -1,14 +1,11 @@
-import { Injectable, OnDestroy, OnInit } from "@angular/core";
-import { BehaviorSubject, Subject, Subscription, catchError, forkJoin, map, switchMap, tap, throwError } from "rxjs";
+import { Injectable } from "@angular/core";
+import { Subject, catchError, forkJoin, map, throwError } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 
 import { FinancialTransaction } from "./financial-transaction-modal/financial-transaction.model";
-import { ToastService } from "../toast/toast.service";
 import { environment } from "../../../environments/environment.development";
 import { CategoryService } from "../../settings/category/category.service";
-import { Category } from "../../settings/category/category.model";
 import { PaymentMethodService } from "../../settings/payment-method/payment-method.service";
-import { PaymentMethod } from "../../settings/payment-method/payment-method.model";
 
 @Injectable({ providedIn: 'root' })
 export class FinancialTransactionService {

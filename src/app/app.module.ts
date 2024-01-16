@@ -17,6 +17,8 @@ import { AppRoutingModule } from './app-routing.model';
 import { CategoryComponent } from './settings/category/category.component';
 import { CategoryModalComponent } from './settings/category/category-modal/category-modal.component';
 import { FinancialTransactionModalComponent } from './shared/financial-transaction/financial-transaction-modal/financial-transaction-modal.component';
+import { NgChartsModule } from 'ng2-charts';
+import { BarChartComponent } from './dashboard/charts/bar-chart/bar-chart.component';
 
 @NgModule({
   declarations: [
@@ -31,6 +33,7 @@ import { FinancialTransactionModalComponent } from './shared/financial-transacti
     CategoryComponent,
     CategoryModalComponent,
     FinancialTransactionModalComponent,
+    BarChartComponent,
   ],
   imports: [
     BrowserModule,
@@ -38,7 +41,8 @@ import { FinancialTransactionModalComponent } from './shared/financial-transacti
     ReactiveFormsModule,
     SimpleNotificationsModule.forRoot(),
     BrowserAnimationsModule,
-    AppRoutingModule
+    AppRoutingModule,
+    NgChartsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
