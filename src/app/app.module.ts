@@ -19,6 +19,7 @@ import { CategoryModalComponent } from './settings/category/category-modal/categ
 import { FinancialTransactionModalComponent } from './shared/financial-transaction/financial-transaction-modal/financial-transaction-modal.component';
 import { NgChartsModule } from 'ng2-charts';
 import { BarChartComponent } from './dashboard/charts/bar-chart/bar-chart.component';
+import { PieChartComponent } from './dashboard/charts/pie-chart/pie-chart.component';
 
 @NgModule({
   declarations: [
@@ -34,6 +35,7 @@ import { BarChartComponent } from './dashboard/charts/bar-chart/bar-chart.compon
     CategoryModalComponent,
     FinancialTransactionModalComponent,
     BarChartComponent,
+    PieChartComponent,
   ],
   imports: [
     BrowserModule,
